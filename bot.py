@@ -215,6 +215,7 @@ def remove_location(bot, update):
 
 def set_home_location(bot, update):
     update.message.reply_text('Not yet implemented. Stay tuned!')
+
     pass
 
 

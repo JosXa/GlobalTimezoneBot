@@ -12,7 +12,7 @@ _db = None
 def db():
     global _db
     if not _db:
-        db_path = config('DATABASE_URI')
+        db_path = config('DATABASE_URI', default=os.path.expanduser('~/data/globaltimezonebot.sqlite3'))
         _db = SqliteDatabase(db_path)
     return _db
 

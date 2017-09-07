@@ -5,7 +5,7 @@ from telegram import ParseMode
 from telegram import ReplyKeyboardRemove
 from telegram.error import BadRequest
 
-from lib.mdformat import success, failure, action_hint, none_action
+from mdformat import success, failure, action_hint
 
 
 class MarkdownFormatter:
@@ -53,20 +53,13 @@ class MarkdownFormatter:
             disable_web_page_preview=True,
             **kwargs)
 
-    def send_none_action(self, chat_id, text: str, **kwargs):
-        if text[-1] == '.':
-            text = text[0:-1]
-        return self.bot.sendMessage(
-            chat_id,
-            none_action(text),
-            parse_mode=ParseMode.MARKDOWN,
-            disable_web_page_preview=True,
-            **kwargs)
-
     def send_or_edit(self, chat_id, text, to_edit=None, **kwargs):
         mid = to_edit
         if isinstance(to_edit, Message):
             mid = to_edit.message_id
+
+        if 'disable_web_page_preview' not in kwargs:
+            kwargs['disable_web_page_preview'] = True
 
         try:
             if to_edit:
@@ -75,7 +68,6 @@ class MarkdownFormatter:
                     chat_id=chat_id,
                     message_id=mid,
                     parse_mode=ParseMode.MARKDOWN,
-                    disable_web_page_preview=True,
                     **kwargs
                 )
 

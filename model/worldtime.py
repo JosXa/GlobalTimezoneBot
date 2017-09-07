@@ -1,21 +1,17 @@
 import datetime
-
-import math
 import urllib
-
-import util
-import pytz
 from pprint import pprint
-import ephem
 
-import pycountry
+import pytz
+from geopy import Location
 from geopy import geocoders
-
-from custemoji import Emoji
-from model.basemodel import BaseModel
 from peewee import *
 
-from model.user import User
+import pycountry
+import util
+from custemoji import Emoji
+from model.basemodel import BaseModel
+from model.chat import Chat
 from sunrise import sun
 
 """
@@ -28,7 +24,7 @@ from sunrise import sun
 
 class WorldTime(BaseModel):
     place = CharField(unique=True)
-    user = ForeignKeyField(User)
+    user = ForeignKeyField(Chat)
     country = CharField()
     lat = CharField()
     lon = CharField()
@@ -38,37 +34,69 @@ class WorldTime(BaseModel):
     GEOCODER = geocoders.GoogleV3()
 
     @staticmethod
-    def lookup(query):
-        place, (lat, lon) = WorldTime.GEOCODER.geocode(query, exactly_one=True)
+    def reverse_geocode(point):
+        return WorldTime.GEOCODER.reverse(point) or []
+
+    @staticmethod
+    def geocode(query):
+        return WorldTime.GEOCODER.geocode(query, exactly_one=False) or []
+
+    @staticmethod
+    def _lookup_country(country):
+        country = country.strip()
+        country_patch = {
+            'russia': 'russian federation',
+            'vietnam': 'viet nam',
+            'uk': 'united kingdom',
+        }
+        repl = country_patch.get(country.lower())
+        if repl:
+            country = repl
+        try:
+            return pycountry.countries.lookup(country)
+        except:
+            return None
+
+    @classmethod
+    def from_location(cls, location: Location):
+        place, (lat, lon) = location
+        print('Looking for a location near {}'.format(location.address))
+
         lat = float(lat)
         lon = float(lon)
-        try:
-            if place is None:
-                return None
-            country_query = place.split(', ')[-1]
-            replacements = {'russia': 'russian federation',
-                            'vietnam': 'viet nam',
-                            'uk': 'united kingdom',
-                            }
-            repl = replacements.get(country_query.lower())
-            if repl:
-                country_query = repl
-            country = pycountry.countries.lookup(country_query)
-
-            try:
-                return WorldTime.get(WorldTime.place == place)
-            except WorldTime.DoesNotExist:
-                pass
-
-            tz = WorldTime.GEOCODER.timezone((lat, lon))
-
-            flg = WorldTime.emoji_from_country(country.alpha_2)
-
-            print('Found {}: {}'.format(query, place))
-            return WorldTime(place=place, country=country.name, lat=lat, lon=lon, timezone=tz.zone, flag_emoji=flg)
-        except Exception:
-            print('Error trying to retrieve {}: {}'.format(query, place))
+        if place is None:
             return None
+
+        country = None
+        # check n-1st and n-2nd token for country
+        splits = place.split(', ')
+        for i in range(1, 3):
+            raw_country = splits[-i]
+            print(raw_country)
+            country = WorldTime._lookup_country(raw_country)
+            if country is not None:
+                break
+
+        if not country:
+            print('Could not find an associated country for input {}, evaluated to {}'.format(location.address, raw_country))
+            return None
+
+        try:
+            return WorldTime.get(WorldTime.place == place)
+        except WorldTime.DoesNotExist:
+            pass
+
+        tz = WorldTime.GEOCODER.timezone((lat, lon))
+
+        flg = WorldTime.emoji_from_country(country.alpha_2)
+
+        return WorldTime(place=place, country=country.name, lat=lat, lon=lon, timezone=tz.zone, flag_emoji=flg)
+
+
+    @staticmethod
+    def lookup(query):
+        result = WorldTime.GEOCODER.geocode(query, exactly_one=True)
+        return WorldTime.from_location(result)
 
     @property
     def datetime_formatted(self):
@@ -113,6 +141,12 @@ class WorldTime(BaseModel):
             return flag(country.alpha_2)
         except Exception:
             return None
+
+    @property
+    def md_place(self):
+        return '{}{}'.format(
+            (self.flag_emoji + ' ') if self.flag_emoji else '',
+            util.escape_markdown(self.place))
 
     @property
     def md_str(self):

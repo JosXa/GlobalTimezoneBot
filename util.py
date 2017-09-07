@@ -10,7 +10,7 @@ from telegram.error import BadRequest
 
 import const
 from custemoji import Emoji
-from telegram import ChatAction, ReplyKeyboardHide
+from telegram import ChatAction, ReplyKeyboardRemove
 from telegram import ParseMode
 import time
 
@@ -220,7 +220,7 @@ def send_message_success(bot, chat_id, text: str, add_punctuation=True, reply_ma
             text += '.'
 
     if not reply_markup:
-        reply_markup = ReplyKeyboardHide()
+        reply_markup = ReplyKeyboardRemove()
     return bot.sendMessage(chat_id, success(text), parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True,
                            reply_markup=reply_markup,
                            **kwargs)

@@ -218,6 +218,7 @@ def add_location_text(bot, update):
 
 
 def select_location(bot, update, chat_data, locations: List[Location], callback):
+    assert len(locations) >= 2
     buttons = []
     cid = update.effective_chat.id
     mid = util.mid_from_update(update)
@@ -242,6 +243,8 @@ def save_location(bot, update, chat_data, location: Location, as_home=False):
     wt = WorldTime.lookup(location)
     if not wt:
         return fail(bot, update)
+    if WorldTime.select().where(WorldTime.user == chat, WorldTime.place == wt.place).exists():
+        return fail(bot, update, "You have already added {}.".format(wt.place), 'action_hint')
     wt.user = chat
     wt.save()
 
@@ -250,8 +253,6 @@ def save_location(bot, update, chat_data, location: Location, as_home=False):
         return main_menu(bot, update, util.success("🏠 {} set as your home location, well done! You can now "
                                                    "calculate time differences ".format(home.md_str)))
     else:
-        if WorldTime.select().where(WorldTime.user == chat, WorldTime.place == wt.place).exists():
-            return fail(bot, update, "You have already added {}.".format(wt.place), 'action_hint')
         return main_menu(bot, update, util.success("{} added. Now try /overview".format(wt.md_place)))
 
 
@@ -282,6 +283,8 @@ def provide_location(bot, update, chat_data, args=None, as_home=False):
         if isinstance(args, list):
             query = ' '.join(args)
         locations = WorldTime.geocode(query)
+        if not locations:
+            return fail(bot, update)
         if len(locations) == 1:
             return save_location(bot, update, chat_data, locations[0], as_home)
         cb = lambda b, u, cd, **kwargs: save_location(b, u, cd, as_home=as_home, **kwargs)
@@ -312,7 +315,7 @@ def set_home_location(bot, update):
 
 def fail(bot, update, message=None, severity='error'):
     if not message:
-        message = "Either Google Maps has a bad day, or you're fucking swimming and shit. 🐳"
+        message = "Either Google Maps has a bad day, or you're fucking swimming in the goddamn ocean and shit. 🐳"
     if severity in ['warning', 'none_action']:
         text = mdformat.none_action(message)
     elif severity == 'action_hint':
@@ -402,7 +405,7 @@ def main():
 
     dp.add_handler(CommandHandler('start', start, pass_args=True))
     dp.add_handler(CommandHandler('help', help))
-    dp.add_handler(CommandHandler('addlocation', provide_location, pass_args=True))
+    dp.add_handler(CommandHandler('addlocation', provide_location, pass_args=True, pass_chat_data=True))
     dp.add_handler(CommandHandler('remlocation', remove_location))
     dp.add_handler(CommandHandler('sethome', set_home_location, pass_args=True))
     dp.add_handler(CommandHandler('display', location_display))

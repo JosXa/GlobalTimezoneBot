@@ -35,11 +35,11 @@ class WorldTime(BaseModel):
 
     @staticmethod
     def reverse_geocode(point):
-        return WorldTime.GEOCODER.reverse(point) or []
+        return WorldTime.GEOCODER.reverse(point, timeout=5) or []
 
     @staticmethod
     def geocode(query):
-        return WorldTime.GEOCODER.geocode(query, exactly_one=False) or []
+        return WorldTime.GEOCODER.geocode(query, exactly_one=False, timeout=5) or []
 
     @staticmethod
     def _lookup_country(country):

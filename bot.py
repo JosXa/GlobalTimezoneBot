@@ -195,7 +195,7 @@ def overview(bot, update):
         wts = [WorldTime.lookup(q) for q in queries]
 
     txt = _overview_text(wts, user)
-    reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton('Share', switch_inline_query='Overview')]])
+    reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton('Share', switch_inline_query='')]])
     util.send_md_message(bot, chat_id, txt, reply_markup=reply_markup)
 
 

@@ -432,6 +432,7 @@ def main():
         updater.start_polling()
 
     log.info('Listening...')
+    updater.bot.formatter.send_message(const.ADMINS[0], "Now serving bananas")
     updater.idle()
 
 

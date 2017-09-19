@@ -74,6 +74,9 @@ def main_menu(bot, update, message=None):
 def inlinequery(bot, update):
     query_text = update.inline_query.query.lower()
     articles = OrderedSet()
+    user = Chat.by_id(update.effective_user.id)
+    if user is None:
+        pass  # TODO
     user_zones = WorldTime.select().where(WorldTime.user.chat_id == update.effective_user.id)
 
     def zone_article(zone: WorldTime):

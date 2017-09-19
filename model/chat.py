@@ -29,6 +29,13 @@ class Chat(BaseModel):
         return WorldTime.select().where(WorldTime.user == self, WorldTime == wt).exists()
 
     @staticmethod
+    def by_id(uid):
+        try:
+            return Chat.get(Chat.chat_id == uid)
+        except Chat.DoesNotExist:
+            return None
+
+    @staticmethod
     @lru_cache(maxsize=64)
     def from_telegram_object(chat: TelegramChat):
         try:

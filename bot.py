@@ -77,7 +77,7 @@ def inlinequery(bot, update):
     user = Chat.by_id(update.effective_user.id)
     if user is None:
         pass  # TODO
-    user_zones = WorldTime.select().where(WorldTime.user.chat_id == update.effective_user.id)
+    user_zones = WorldTime.select().where(WorldTime.user == user)
 
     def zone_article(zone: WorldTime):
         text = "It is a {} in *{}*:\n\n".format(zone.weekday_formatted, zone.country)

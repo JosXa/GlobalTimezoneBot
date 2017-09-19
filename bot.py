@@ -73,9 +73,8 @@ def main_menu(bot, update, message=None):
 
 def inlinequery(bot, update):
     query_text = update.inline_query.query.lower()
-    user = Chat.from_telegram_object(update.effective_chat)
     articles = OrderedSet()
-    user_zones = WorldTime.select().where(WorldTime.user == user)
+    user_zones = WorldTime.select().where(WorldTime.user.chat_id == update.effective_user.id)
 
     def zone_article(zone: WorldTime):
         text = "It is a {} in *{}*:\n\n".format(zone.weekday_formatted, zone.country)

@@ -19,6 +19,10 @@ A revived Telegram bot for answering "what time is it there?" without depending 
 
 On startup, the bot reads `commands.txt`, compares it with the live Telegram command list, and updates the bot commands only when they differ. If Telegram rate-limits that update, the bot logs it and moves on instead of blocking startup.
 
+By default the bot uses long polling. Set `TELEGRAM_MODE=webhook` plus
+`WEBHOOK_PUBLIC_URL`, `WEBHOOK_PATH`, and `WEBHOOK_SECRET_TOKEN` to run it
+behind a public HTTPS webhook endpoint.
+
 ## Commands
 
 - `/start` — welcome and quick actions

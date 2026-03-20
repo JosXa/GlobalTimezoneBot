@@ -1629,5 +1629,22 @@ def run_bot(settings: Settings) -> None:
     logging.getLogger("telegram.ext.ExtBot").setLevel(logging.WARNING)
     bot = GlobalTimezoneBot(settings)
     application = bot.build_application()
-    LOGGER.info("Starting polling bot")
-    application.run_polling(allowed_updates=Update.ALL_TYPES)
+    if settings.webhook is None:
+        LOGGER.info("Starting polling bot")
+        application.run_polling(allowed_updates=Update.ALL_TYPES)
+        return
+
+    LOGGER.info(
+        "Starting webhook bot on %s:%s%s",
+        settings.webhook.listen,
+        settings.webhook.port,
+        settings.webhook.path,
+    )
+    application.run_webhook(
+        listen=settings.webhook.listen,
+        port=settings.webhook.port,
+        url_path=settings.webhook.url_path,
+        webhook_url=settings.webhook.webhook_url,
+        secret_token=settings.webhook.secret_token,
+        allowed_updates=Update.ALL_TYPES,
+    )

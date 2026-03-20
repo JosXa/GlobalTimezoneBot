@@ -12,7 +12,7 @@ dependencies = [
   "astral>=3.2",
   "geopy>=2.4.1",
   "pycountry>=24.6.1",
-  "python-telegram-bot>=22.0,<23.0",
+  "python-telegram-bot[webhooks]>=22.0,<23.0",
   "timezonefinder>=6.5.8",
   "tzdata>=2025.2",
 ]

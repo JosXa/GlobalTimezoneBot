@@ -6,6 +6,7 @@ import secrets
 from collections import defaultdict
 from dataclasses import dataclass
 from html import escape
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
 from telegram import (
@@ -48,7 +49,6 @@ from globaltimezonebot.storage import Storage
 
 if TYPE_CHECKING:
     from datetime import datetime
-    from pathlib import Path
 
     from globaltimezonebot.config import Settings
 
@@ -109,7 +109,7 @@ class GlobalTimezoneBot:
         self._meeting_sessions: dict[str, MeetingSelectionSession] = {}
         self._chat_input_mode: dict[int, str] = {}
         self._command_sync_task: asyncio.Task[None] | None = None
-        self.commands_path = PROJECT_ROOT / "commands.txt"
+        self.commands_path = _resolve_commands_path()
 
     def build_application(self) -> Application:
         builder = ApplicationBuilder().token(self.settings.bot_token)
@@ -1508,6 +1508,13 @@ def _parse_display_mode(text: str) -> DisplayMode | None:
         if normalized == mode.value or normalized == mode.label.casefold():
             return mode
     return None
+
+
+def _resolve_commands_path() -> Path:
+    cwd_commands = Path.cwd() / "commands.txt"
+    if cwd_commands.exists():
+        return cwd_commands
+    return PROJECT_ROOT / "commands.txt"
 
 
 def _load_commands_file(path: Path) -> list[BotCommand]:

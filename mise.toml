@@ -1,0 +1,19 @@
+[tasks.check]
+description = "Run lint, format, and type checks"
+run = [
+  "uv run ruff check --fix src tests",
+  "uv run ruff format src tests",
+  "uv run ty check --error all src tests",
+]
+
+[tasks.lint]
+description = "Run ruff lint"
+run = "uv run ruff check src tests"
+
+[tasks.format]
+description = "Run ruff format"
+run = "uv run ruff format src tests"
+
+[tasks.typecheck]
+description = "Run ty type checker"
+run = "uv run ty check --error all src tests"

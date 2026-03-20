@@ -1,0 +1,12 @@
+start - Welcome and quick guide
+help - See commands and examples
+now - Current time for a place
+sun - Sunrise and sunset for a place
+add - Save a location
+home - Set your home location
+compare - Compare locations or compare with home
+meeting - Pick timezones and find a meeting window
+manage - Visual registry control for saved places
+overview - Pretty overview of saved locations
+remove - Remove a saved location
+display - Choose overview display mode
